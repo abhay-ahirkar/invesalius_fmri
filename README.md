@@ -35,7 +35,7 @@ The following features may be added in the future:
 ## Screenshots and Videos
 
 Sample screenshots and videos will be provided as the project progresses.
-![alt text](https://github.com/abhay-ahirkar/invesalius_fmri/blob/master/media/Screenshot%202023-04-04%20150338.jpg)
+![alt text](https://github.com/abhay-ahirkar/invesalius_fmri/blob/master/media/Screenshot%202023-04-04%20150338.jpg?raw=true)
 
 
 
