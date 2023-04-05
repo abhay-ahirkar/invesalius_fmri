@@ -1,3 +1,7 @@
+import wx
+import numpy as np
+from matplotlib import cm
+
 # Here's an example of how we could modify the SliceViewer class to add support for fMRI overlays:
 
 class SliceViewer(wx.Window):
@@ -47,3 +51,19 @@ class SliceViewer(wx.Window):
         self.fmri_info = fmri_info
         self.fmri_alpha = alpha
         self.fmri_cmap = cmap
+
+class MainFrame(wx.Frame):
+    def __init__(self):
+        super().__init__(parent=None, title="SlicerView", size=(400, 300))
+        self.SetBackgroundColour(wx.WHITE)
+        slice_data = np.random.randn(256, 256, 50)
+        fmri_data = np.random.randn(256, 256, 50)
+        self.panel = SliceViewer(self, -1, slice_data, fmri_data=fmri_data)
+        self.panel.SetBackgroundColour(wx.WHITE)
+        self.Show()
+ 
+ 
+if __name__ == "__main__":
+    app = wx.App()
+    frame = MainFrame()
+    app.MainLoop()

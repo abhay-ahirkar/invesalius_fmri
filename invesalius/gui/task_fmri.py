@@ -1,10 +1,11 @@
+#from asyncio import Task
 import wx
 import os
 import numpy as np
 import nibabel as nib
-from invesalius.gui.task import Task
+#from invesalius.gui.task import Task
 
-class FMRITask(Task):
+class FMRITask(wx.panel):
     """
     A new task for fMRI functionality that extends the base Task class
     """
@@ -13,7 +14,7 @@ class FMRITask(Task):
         """
         Initializes the FMRITask object
         """
-        Task.__init__(self, parent)
+        wx.panel.__init__(self, parent)
 
         # Define fMRI-specific attributes
         self.fmri_data = None
