@@ -222,8 +222,3 @@ def read_nifti_file(file_path):
         # Return None
         return None
 
-if __name__ == "__main__":
-    app = wx.App(False)
-    frame = MainFrame()
-    app.MainLoop()
-    

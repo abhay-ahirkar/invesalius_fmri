@@ -1,6 +1,6 @@
 import wx
 from gui.task_fmri import TaskFMRI
-from reader.others_reader import read_nifti_file
+from reader.others_reader import  read_nifti_file
 from data.viewer_slice import SliceViewer
 from data.imagedata_utils import *
 from data.viewer_volume import VolumeViewer
@@ -37,7 +37,7 @@ class InvesaliusFMRI(wx.App):
     def on_load_button(self, event):
         file_path = self.task_panel.get_file_path()
         if file_path:
-            self.data = read_nifti_file(file_path)
+            self.data = read_nifti_file()(file_path).get_data()
             self.slice_viewer.set_data(self.data)
             self.volume_viewer.set_data(self.data)
     
@@ -48,6 +48,10 @@ class InvesaliusFMRI(wx.App):
     def on_volume_scroll(self, event):
         slice_num = self.volume_viewer.get_slice_number()
         self.slice_viewer.set_slice_number(slice_num)
+
+
+
+
 
 if __name__ == "__main__":
     app = InvesaliusFMRI()
