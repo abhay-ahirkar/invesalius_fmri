@@ -14,75 +14,106 @@ from vtkmodules.vtkInteractionImage import vtkImageViewer
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader, vtkXMLImageDataWriter
 
 
-def read_image(file_name):
-    reader = vtkXMLImageDataReader()
-    reader.SetFileName(file_name)
-    reader.Update()
-    return reader.GetOutput()
+def get_image_data_from_file(file_path):
+    """
+    Get image data from file.
+    :param file_path: The file path.
+    :return: The image data.
+    """
+
+    # Get the file extension
+    file_extension = file_path.split(".")[-1]
+
+    # Check if the file extension is DICOM
+    if file_extension == "dcm" or file_extension == "dicom":
+        # Read the DICOM file
+        reader = gdcm.ImageReader()
+        reader.SetFileName(file_path)
+        reader.Read()
+
+        # Get the image
+        image = reader.GetImage()
+
+        # Get the image data
+        image_data = image.GetBuffer()
+
+        # Get the image dimensions
+        image_dimensions = image.GetDimensions()
+
+        # Get the image spacing
+        image_spacing = image.GetSpacing()
+
+        # Get the image origin
+        image_origin = image.GetOrigin()
+
+        # Get the image direction
+        image_direction = image.GetDirectionCosines()
+
+        # Get the image data type
+        image_data_type = image.GetPixelFormat().GetScalarTypeAsString()
+
+        # Get the image data type
+        if image_data_type == "UINT8":
+            image_data_type = numpy.uint8
+        elif image_data_type == "INT8":
+            image_data_type = numpy.int8
+        elif image_data_type == "UINT16":
+            image_data_type = numpy.uint16
+        elif image_data_type == "INT16":
+            image_data_type = numpy.int16
+        elif image_data_type == "UINT32":
+            image_data_type = numpy.uint32
+        elif image_data_type == "INT32":
+            image_data_type = numpy.int32
+        elif image_data_type == "FLOAT32":
+            image_data_type = numpy.float32
+        elif image_data_type == "FLOAT64":
+            image_data_type = numpy.float64
+
+        # Get the image data
+        image_data = numpy.frombuffer(image_data, dtype=image_data_type)
+
+        # Reshape the image data
+        image_data = image_data.reshape(image_dimensions, order="F")
+
+        # Get the image data
+        image_data = numpy.swapaxes(image_data, 0, 2)
+
+        # Get the image data
+        image_data = numpy.flip(image_data, 0)
+
+        # Get the image data
+        image_data = numpy.flip(image_data, 1)
+
+        # Get the image data
+        image_data = numpy.flip(image_data, 2)
+
+        # Get the image data
+        image_data = numpy.rot90(image_data, 1, (0, 1))
 
 
-def write_image(image_data, file_name):
-    writer = vtkXMLImageDataWriter()
-    writer.SetFileName(file_name)
-    writer.SetInputData(image_data)
-    writer.Write()
+    # Check if the file extension is NIFTI
+
+    elif file_extension == "nii" or file_extension == "nii.gz":
+        # Read the NIFTI file
+        image_data = nib.load(file_path).get_fdata()
+
+        # Get the image data
+        image_data = numpy.swapaxes(image_data, 0, 2)
+
+        # Get the image data
+        image_data = numpy.flip(image_data, 0)
+
+        # Get the image data
+        image_data = numpy.flip(image_data, 1)
+
+        # Get the image data
+        image_data = numpy.flip(image_data, 2)
+
+        # Get the image data
+        image_data = numpy.rot90(image_data, 1, (0, 1))
+
+    
 
 
-def resize_image(image_data, factor):
-    shape = image_data.GetDimensions()
-    new_shape = [math.ceil(factor * dim) for dim in shape]
-    resampled_data = vtkImageResample()
-    resampled_data.SetInputData(image_data)
-    resampled_data.SetOutputDimensions(new_shape)
-    resampled_data.Update()
-    return resampled_data.GetOutput()
 
-
-def clip_image(image_data, lower_threshold, upper_threshold):
-    clipper = vtkImageClip()
-    clipper.SetInputData(image_data)
-    clipper.ClipDataOn()
-    clipper.InsideOutOn()
-    clipper.SetOutputScalarTypeToUnsignedChar()
-    clipper.SetClipDataScalarRange(lower_threshold, upper_threshold)
-    clipper.Update()
-    return clipper.GetOutput()
-
-
-def smooth_image(image_data, kernel_size):
-    smoother = vtkImageGaussianSmooth()
-    smoother.SetInputData(image_data)
-    smoother.SetStandardDeviations(kernel_size, kernel_size, kernel_size)
-    smoother.Update()
-    return smoother.GetOutput()
-
-
-def extract_voi(image_data, voi):
-    extractor = vtkExtractVOI()
-    extractor.SetInputData(image_data)
-    extractor.SetVOI(voi)
-    extractor.Update()
-    return extractor.GetOutput()
-
-
-def append_images(image_list):
-    appender = vtkImageAppend()
-    for image in image_list:
-        appender.AddInputData(image)
-    appender.Update()
-    return appender.GetOutput()
-
-
-def save_as_video(image_data, output_path, fps):
-    shape = image_data.GetDimensions()
-    writer = imageio.get_writer(output_path, fps=fps)
-    for i in range(shape[0]):
-        slice_data = vtkExtractVOI()
-        slice_data.SetInputData(image_data)
-        slice_data.SetVOI(i, i, 0, shape[1] - 1, 0, shape[2] - 1)
-        slice_data.Update()
-        slice_np = numpy_support.vtk_to_numpy(slice_data.GetOutput().GetPointData().GetScalars())
-        slice_np = slice_np.reshape((shape[1], shape[2]))
-        slice_np = (slice_np / np.max(slice_np) * 255).astype(np.uint8)
-        writer.append_data(slice_np)
-    writer.close()
